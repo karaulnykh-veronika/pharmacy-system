@@ -2,6 +2,7 @@
 VENV := .venv
 PYTHON := $(VENV)/Scripts/python
 PIP := $(VENV)/Scripts/pip
+PYTEST := $(VENV)/Scripts/pytest
 
 .PHONY: help setup run run-cli test clean
 
@@ -16,6 +17,7 @@ help:
 setup:
 	python -m venv $(VENV)
 	-$(PIP) install --upgrade pip
+	$(PIP) install pytest pytest-cov
 
 run:
 	$(PYTHON) -c "print('Tkinter app will go here')"
@@ -24,8 +26,9 @@ run-cli:
 	$(PYTHON) app/cli/main.py
 
 test:
-	@echo "No tests yet"
+	$(PYTEST) tests/ -v
 
 clean:
 	rm -rf $(VENV)
 	rm -rf __pycache__
+	rm -rf .pytest_cache
