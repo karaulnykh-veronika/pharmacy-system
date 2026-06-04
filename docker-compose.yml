@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  pharmacy:
+    build: .
+    container_name: pharmacy-system
+    volumes:
+      - ./pharmacy.db:/app/pharmacy.db
+      - ./src/pharmacy/data:/app/src/pharmacy/data
+    environment:
+      - PYTHONUNBUFFERED=1
