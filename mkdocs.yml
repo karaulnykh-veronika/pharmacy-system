@@ -1,0 +1,10 @@
+site_name: Pharmacy System
+site_description: Аптечная система управления продажами, складом и возвратами
+theme:
+  name: material
+  language: ru
+nav:
+  - Главная: index.md
+  - Спецификация: specification.md
+  - Архитектура: architecture.md
+  - API: api.md
