@@ -6,7 +6,7 @@ from decimal import Decimal
 from pathlib import Path
 from typing import List, Optional, Tuple
 
-from src.pharmacy.models import Product
+from pharmacy.models import Product
 
 
 class PharmacyDatabase:
