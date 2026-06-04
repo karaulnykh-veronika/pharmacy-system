@@ -32,3 +32,6 @@ clean:
 	rm -rf $(VENV)
 	rm -rf __pycache__
 	rm -rf .pytest_cache
+
+smoke:
+	$(PYTEST) tests/smoke/ -v
