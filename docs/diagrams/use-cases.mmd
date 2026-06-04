@@ -1,0 +1,22 @@
+flowchart TD
+    Actor1[Кассир]
+    Actor2[Управляющий]
+    
+    subgraph UseCases[Сценарии использования]
+        UC1[Продажа товара]
+        UC2[Возврат товара]
+        UC3[Просмотр каталога]
+        UC4[Пополнение склада]
+        UC5[Просмотр статистики]
+    end
+    
+    Actor1 --> UC1
+    Actor1 --> UC2
+    Actor1 --> UC3
+    Actor2 --> UC4
+    Actor2 --> UC5
+    
+    UC1 -.-> DB[(База данных)]
+    UC2 -.-> DB
+    UC4 -.-> DB
+    UC5 -.-> DB

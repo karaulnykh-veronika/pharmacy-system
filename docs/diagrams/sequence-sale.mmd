@@ -1,0 +1,19 @@
+sequenceDiagram
+    participant Cashier as Кассир
+    participant CLI as CLI Приложение
+    participant Business as Бизнес-логика
+    participant DB as База данных
+    
+    Cashier->>CLI: Выбор товара и количества
+    CLI->>DB: Проверить наличие
+    DB-->>CLI: Остаток на складе
+    
+    alt Достаточно на складе
+        CLI->>Business: Рассчитать стоимость
+        Business-->>CLI: Сумма со скидкой
+        CLI->>DB: Обновить остаток
+        CLI->>DB: Сохранить чек
+        CLI-->>Cashier: Показать чек
+    else Недостаточно
+        CLI-->>Cashier: Сообщение об ошибке
+    end
