@@ -23,3 +23,6 @@ test:
 
 clean:
 	rm -rf $(VENV)
+
+run-cli:
+	$(PYTHON) app/cli/main.py
