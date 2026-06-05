@@ -1,37 +1,21 @@
-# Makefile for Pharmacy System (Windows compatible)
-VENV := .venv
-PYTHON := $(VENV)/Scripts/python
-PIP := $(VENV)/Scripts/pip
-PYTEST := $(VENV)/Scripts/pytest
-
-.PHONY: help setup run run-cli test clean
+.PHONY: help setup run test clean
 
 help:
-	@echo "Available commands:"
-	@echo "  make setup      - Create virtual environment"
-	@echo "  make run        - Run the pharmacy application (Tkinter)"
-	@echo "  make run-cli    - Run CLI demo"
-	@echo "  make test       - Run tests"
-	@echo "  make clean      - Remove virtual environment"
+	@echo "Доступные команды:"
+	@echo "  make setup  - установка зависимостей"
+	@echo "  make run    - запуск приложения"
+	echo "  make test   - запуск тестов"
+	@echo "  make clean  - удаление временных файлов"
 
 setup:
-	python -m venv $(VENV)
-	-$(PIP) install --upgrade pip
-	$(PIP) install pytest pytest-cov
+	pip install -r requirements.txt
 
 run:
-	$(PYTHON) -c "print('Tkinter app will go here')"
-
-run-cli:
-	$(PYTHON) app/cli/main.py
+	python app/gui/main_window.py
 
 test:
-	$(PYTEST) tests/ -v
+	pytest tests/ -v
 
 clean:
-	rm -rf $(VENV)
-	rm -rf __pycache__
-	rm -rf .pytest_cache
-
-smoke:
-	$(PYTEST) tests/smoke/ -v
+	rm -rf __pycache__ .pytest_cache .coverage
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true

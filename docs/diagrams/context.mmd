@@ -1,14 +1,7 @@
 flowchart LR
-    Cashier[Кассир]
-    Manager[Управляющий]
-    
-    subgraph PharmacySystem[Аптечная система]
-        CLI[CLI Интерфейс]
-        Core[Бизнес-ядро]
-        DB[(SQLite БД)]
-    end
-    
-    Cashier -->|Продажа, возврат| CLI
-    Manager -->|Статистика, пополнение склада| CLI
-    CLI --> Core
-    Core --> DB
+    User[Пользователь]
+    System[Pharmacy System]
+    DB[(SQLite Database)]
+
+    User --> System
+    System --> DB

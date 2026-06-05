@@ -1,17 +1,30 @@
-# Pharmacy System
+# 💊 Pharmacy Management System
 
-Project for FOSSDEV course.
+Система управления аптекой с графическим интерфейсом. Проект демонстрирует правильное разделение на переиспользуемую бизнес-логику (packages/core/) и запускаемое приложение (app/gui/).
 
-## Commands
+## 📋 О проекте
 
-- `make setup` - create virtual environment
-- `make run` - run application
-- `make test` - run tests
-- `make clean` - clean up
+Проект позволяет:
+- Просматривать каталог лекарств с поиском
+- Добавлять товары в корзину
+- Оформлять покупку с печатью чека
+- Пополнять склад
+- Оформлять возвраты по чеку
+- Смотреть статистику продаж
 
-## Project Structure
+## 🏗️ Архитектура
 
+- app/gui/ - слой приложения (GUI на tkinter)
+- packages/core/ - переиспользуемое ядро (модели, сервисы, репозитории)
+- tests/ - тесты
+- docs/ - документация
 
-## License
+## 🚀 Быстрый старт
 
-MIT
+### Установка
+
+```bash
+git clone https://github.com/karaulnykh-veronika/pharmacy-system.git
+cd pharmacy-system
+make setup
+
