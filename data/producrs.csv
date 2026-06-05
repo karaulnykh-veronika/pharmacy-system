@@ -1,0 +1,4 @@
+id_product,name_of_product,price,id_category,quantity_at_storage
+1,Аспирин,50,1,100
+2,Парацетамол,30,1,150
+3,Нурофен,120,1,80
