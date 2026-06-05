@@ -1,0 +1,38 @@
+sequenceDiagram
+    participant User as Пользователь
+    participant GUI as GUI (main_window)
+    participant Service as Core Services
+    participant Repo as Repository
+    participant DB as SQLite
+
+    User->>GUI: Вводит название и количество
+    GUI->>Service: find_product_by_name(name)
+    Service-->>GUI: Product или None
+
+    alt Товар не найден
+        GUI-->>User: "Товара нет в каталоге"
+    else Товар найден
+        GUI->>Service: check_stock_availability(product, qty)
+
+        alt Недостаточно на складе
+            Service-->>GUI: False
+            GUI-->>User: "Недостаточно!"
+        else Достаточно
+            Service-->>GUI: True
+            GUI->>Repo: update_quantity(product_id, new_qty)
+            Repo->>DB: UPDATE producrs
+            DB-->>Repo: OK
+            Repo-->>GUI: OK
+
+            GUI->>GUI: Добавить в корзину
+
+            User->>GUI: Нажать "Купить"
+            GUI->>Repo: create_receipt(cashier_id, items)
+            Repo->>DB: INSERT INTO reseipts
+            Repo->>DB: INSERT INTO sale_items
+            DB-->>Repo: check_id
+            Repo-->>GUI: check_id
+
+            GUI->>User: Показать чек
+        end
+    end

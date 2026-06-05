@@ -1,4 +1,24 @@
 flowchart TD
-    User[Фармацевт] --> View[Просмотр каталога]
-    User --> Add[Добавление в корзину]
-    User --> Buy[Оформление покупки]
+    subgraph "Pharmacy System"
+        UC1[Просмотр каталога]
+        UC2[Поиск товаров]
+        UC3[Добавление в корзину]
+        UC4[Оформление покупки]
+        UC5[Печать чека]
+        UC6[Пополнение склада]
+        UC7[Возврат товара]
+        UC8[Просмотр статистики]
+    end
+
+    Pharmacist[Фармацевт]
+    Manager[Управляющий]
+
+    Pharmacist --> UC1
+    Pharmacist --> UC2
+    Pharmacist --> UC3
+    Pharmacist --> UC4
+    Pharmacist --> UC5
+    Pharmacist --> UC6
+    Pharmacist --> UC7
+
+    Manager --> UC8

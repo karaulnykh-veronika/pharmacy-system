@@ -1,3 +1,11 @@
 flowchart LR
-    User[Пользователь] --> System[Pharmacy System]
-    System --> DB[(SQLite)]
+    User[Пользователь\nФармацевт]
+    Reviewer[Проверяющий\nПреподаватель]
+    System[Pharmacy System\nСистема управления аптекой]
+    DB[(SQLite Database\npharmacy.db)]
+    CSV[(CSV Files\nначальные данные)]
+
+    User -->|Просмотр каталога\nДобавление в корзину\nОформление покупки\nПополнение склада\nВозвраты\nСтатистика| System
+    Reviewer -->|git clone\nmake test\nmake run| System
+    System -->|Чтение/запись| DB
+    System -->|Загрузка при первом запуске| CSV
