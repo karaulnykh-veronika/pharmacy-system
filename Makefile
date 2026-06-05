@@ -58,3 +58,50 @@ check: test coverage
 
 lint:
 	@flake8 packages/ app/ --max-line-length=120 --ignore=E501 2>/dev/null || echo "  Установите flake8: pip install flake8"
+
+build-lib:
+	@echo "Сборка компонента..."
+	@if [ -f "setup.py" ]; then \
+		python setup.py sdist bdist_wheel; \
+		echo "Собрано в dist/"; \
+	else \
+		echo "setup.py не найден. Компонент не собран."; \
+	fi
+
+publish-lib:
+	@echo "Публикация компонента (TestPyPI)..."
+	@echo "  Сначала зарегистрируйтесь на test.pypi.org"
+	@echo "  Затем выполните: twine upload --repository testpypi dist/*"
+
+install-lib-local:
+	@echo "Локальная установка компонента..."
+	pip install -e .
+
+# Дополнительные команды для работы с компонентом
+
+build-lib:
+	@echo " Сборка компонента..."
+	@if [ -f "setup.py" ]; then \
+		python setup.py sdist bdist_wheel; \
+		echo " Собрано в dist/"; \
+		ls -la dist/; \
+	else \
+		echo " setup.py не найден. Компонент не собран."; \
+	fi
+
+publish-lib:
+	@echo " Публикация компонента на TestPyPI..."
+	@echo "  Требуется: pip install twine"
+	@echo "  Команда: twine upload --repository testpypi dist/*"
+
+install-lib-local:
+	@echo " Локальная установка компонента..."
+	pip install -e .
+	@echo " Компонент установлен. Можно импортировать: from packages.core import ..."
+
+smoke-test:
+	@echo " Запуск smoke-тестов..."
+	pytest tests/smoke/ -v
+
+check-all: test smoke-test coverage
+	@echo " Полная проверка пройдена!"
