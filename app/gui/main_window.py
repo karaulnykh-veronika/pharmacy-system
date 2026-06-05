@@ -56,6 +56,26 @@ class MainWindow:
     def _init_database(self):
         cursor = self.conn.cursor()
         
+        # Таблица должностей
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS jobs_titles (
+                id_job_title INTEGER PRIMARY KEY,
+                name TEXT NOT NULL
+            )
+        """)
+        
+        # Таблица сотрудников
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS emploees (
+                id_employee INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                surname TEXT NOT NULL,
+                id_job_title INTEGER NOT NULL,
+                FOREIGN KEY(id_job_title) REFERENCES jobs_titles(id_job_title)
+            )
+        """)
+        
+        # Таблица категорий
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS categories (
                 id_category INTEGER PRIMARY KEY,
@@ -63,6 +83,7 @@ class MainWindow:
             )
         """)
         
+        # Таблица товаров
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS producrs (
                 id_product INTEGER PRIMARY KEY,
@@ -74,15 +95,7 @@ class MainWindow:
             )
         """)
         
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS emploees (
-                id_employee INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
-                surname TEXT NOT NULL,
-                id_job_title INTEGER NOT NULL
-            )
-        """)
-        
+        # Таблица чеков
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS reseipts (
                 id_check INTEGER PRIMARY KEY,
@@ -93,6 +106,7 @@ class MainWindow:
             )
         """)
         
+        # Таблица позиций в чеках
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS sale_items (
                 id_sale INTEGER PRIMARY KEY,
@@ -105,6 +119,7 @@ class MainWindow:
             )
         """)
         
+        # Таблица возвратов
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS returns (
                 id_return INTEGER PRIMARY KEY,
@@ -119,18 +134,37 @@ class MainWindow:
         
         self.conn.commit()
         
+        # Добавляем категории, если их нет
+        cursor.execute("SELECT COUNT(*) FROM categories")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("INSERT INTO categories (id_category, name_category) VALUES (1, 'Лекарства')")
+            cursor.execute("INSERT INTO categories (id_category, name_category) VALUES (2, 'БАДы')")
+            cursor.execute("INSERT INTO categories (id_category, name_category) VALUES (3, 'Медизделия')")
+            self.conn.commit()
+        
+        # Добавляем должность, если нет
+        cursor.execute("SELECT COUNT(*) FROM jobs_titles")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("INSERT INTO jobs_titles (id_job_title, name) VALUES (1, 'Фармацевт')")
+            self.conn.commit()
+        
+        # Добавляем сотрудника, если нет
         cursor.execute("SELECT COUNT(*) FROM emploees")
         if cursor.fetchone()[0] == 0:
             cursor.execute("INSERT INTO emploees (id_employee, name, surname, id_job_title) VALUES (1, 'Admin', 'Admin', 1)")
             self.conn.commit()
         
-        # Загружаем тестовые товары, если их нет
+        # Добавляем товары, если их нет
         cursor.execute("SELECT COUNT(*) FROM producrs")
         if cursor.fetchone()[0] == 0:
             cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (1, 'Аспирин', 50, 1, 100)")
             cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (2, 'Парацетамол', 30, 1, 150)")
             cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (3, 'Нурофен', 120, 1, 80)")
+            cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (4, 'Витамин C', 200, 2, 50)")
+            cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (5, 'Бинт', 25, 3, 200)")
             self.conn.commit()
+        
+        self.conn.commit()
     
     def _create_widgets(self):
         top_frame = tk.Frame(self.root, bg="#f0f0f0", padx=15, pady=15)
@@ -211,35 +245,35 @@ class MainWindow:
         if self.basket_window and self.basket_window.winfo_exists():
             self.basket_window.lift()
             return
-        from .basket_window import BasketWindow
+        from app.gui.basket_window import BasketWindow
         self.basket_window = BasketWindow(self.root, self)
     
     def open_catalog(self):
         if self.catalog_window and self.catalog_window.winfo_exists():
             self.catalog_window.lift()
             return
-        from .catalog_window import CatalogWindow
+        from app.gui.catalog_window import CatalogWindow
         self.catalog_window = CatalogWindow(self.root, self.products)
     
     def open_storage(self):
         if self.storage_window and self.storage_window.winfo_exists():
             self.storage_window.lift()
             return
-        from .storage_window import StorageWindow
+        from app.gui.storage_window import StorageWindow
         self.storage_window = StorageWindow(self.root, self)
     
     def open_return(self):
         if self.return_window and self.return_window.winfo_exists():
             self.return_window.lift()
             return
-        from .return_window import ReturnWindow
+        from app.gui.return_window import ReturnWindow
         self.return_window = ReturnWindow(self.root, self)
     
     def open_statistics(self):
         if self.statistics_window and self.statistics_window.winfo_exists():
             self.statistics_window.lift()
             return
-        from .statistics_window import StatisticsWindow
+        from app.gui.statistics_window import StatisticsWindow
         self.statistics_window = StatisticsWindow(self.root, self)
     
     def clear_basket(self):
