@@ -6,7 +6,6 @@ import datetime as dt
 import os
 import sqlite3
 
-# Добавляем путь к packages в sys.path (для работы из любой папки)
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
@@ -21,32 +20,32 @@ from packages.core.repositories import (
 
 
 def get_database_path():
-    """Возвращает путь к файлу базы данных"""
     return os.path.join(os.path.dirname(__file__), "..", "..", "pharmacy.db")
 
 
 class MainWindow:
     def __init__(self):
-        # Подключаемся к БД
         db_path = get_database_path()
         self.conn = sqlite3.connect(db_path)
         self.conn.execute("PRAGMA foreign_keys = ON;")
         
-        # Создаём таблицы, если их нет
         self._init_database()
         
-        # Создаём репозитории
         self.product_repo = SQLiteProductRepository(self.conn)
         self.sale_repo = SQLiteSaleRepository(self.conn)
         
-        # Загружаем товары
         self.products = self.product_repo.get_all()
         
-        # Состояние корзины
         self.basket = []
         self.all_sum = 0.0
         
-        # Создаём окно
+        # Окна
+        self.basket_window = None
+        self.catalog_window = None
+        self.storage_window = None
+        self.return_window = None
+        self.statistics_window = None
+        
         self.root = tk.Tk()
         self.root.geometry("970x400")
         self.root.title("Аптека - Система управления")
@@ -55,7 +54,6 @@ class MainWindow:
         self._create_widgets()
     
     def _init_database(self):
-        """Создаёт таблицы, если их нет"""
         cursor = self.conn.cursor()
         
         cursor.execute("""
@@ -121,10 +119,17 @@ class MainWindow:
         
         self.conn.commit()
         
-        # Добавляем тестового сотрудника, если нет
         cursor.execute("SELECT COUNT(*) FROM emploees")
         if cursor.fetchone()[0] == 0:
             cursor.execute("INSERT INTO emploees (id_employee, name, surname, id_job_title) VALUES (1, 'Admin', 'Admin', 1)")
+            self.conn.commit()
+        
+        # Загружаем тестовые товары, если их нет
+        cursor.execute("SELECT COUNT(*) FROM producrs")
+        if cursor.fetchone()[0] == 0:
+            cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (1, 'Аспирин', 50, 1, 100)")
+            cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (2, 'Парацетамол', 30, 1, 150)")
+            cursor.execute("INSERT INTO producrs (id_product, name_of_product, price, id_category, quantity_at_storage) VALUES (3, 'Нурофен', 120, 1, 80)")
             self.conn.commit()
     
     def _create_widgets(self):
@@ -153,15 +158,18 @@ class MainWindow:
         bottom_frame = tk.Frame(self.root, bg="#f0f0f0", padx=10, pady=10)
         bottom_frame.pack(side='bottom', fill='x')
         
-        btn_basket = tk.Button(bottom_frame, text="Корзина", font="Arial 14",
-                              bg="#e0e0e0", relief="raised",
-                              padx=10, pady=5, command=self.open_basket)
-        btn_basket.pack(side='left', padx=10, expand=True)
+        buttons = [
+            ("📦 Добавить на склад", self.open_storage),
+            ("↩️ Вернуть товар", self.open_return),
+            ("🛒 Корзина", self.open_basket),
+            ("📋 Каталог", self.open_catalog),
+            ("📊 Статистика", self.open_statistics)
+        ]
         
-        btn_catalog = tk.Button(bottom_frame, text="Каталог", font="Arial 14",
-                               bg="#e0e0e0", relief="raised",
-                               padx=10, pady=5, command=self.open_catalog)
-        btn_catalog.pack(side='left', padx=10, expand=True)
+        for text, command in buttons:
+            btn = tk.Button(bottom_frame, text=text, font="Arial 14", bg="#e0e0e0", 
+                           relief="raised", padx=10, pady=5, command=command)
+            btn.pack(side='left', padx=10, expand=True)
     
     def add_to_cart(self):
         name = self.textfield.get().strip()
@@ -200,13 +208,43 @@ class MainWindow:
         self.cnt.delete(0, tk.END)
     
     def open_basket(self):
-        if hasattr(self, 'basket_window') and self.basket_window and self.basket_window.winfo_exists():
+        if self.basket_window and self.basket_window.winfo_exists():
             self.basket_window.lift()
             return
-        self.basket_window = BasketWindow(self)
+        from .basket_window import BasketWindow
+        self.basket_window = BasketWindow(self.root, self)
     
     def open_catalog(self):
-        CatalogWindow(self)
+        if self.catalog_window and self.catalog_window.winfo_exists():
+            self.catalog_window.lift()
+            return
+        from .catalog_window import CatalogWindow
+        self.catalog_window = CatalogWindow(self.root, self.products)
+    
+    def open_storage(self):
+        if self.storage_window and self.storage_window.winfo_exists():
+            self.storage_window.lift()
+            return
+        from .storage_window import StorageWindow
+        self.storage_window = StorageWindow(self.root, self)
+    
+    def open_return(self):
+        if self.return_window and self.return_window.winfo_exists():
+            self.return_window.lift()
+            return
+        from .return_window import ReturnWindow
+        self.return_window = ReturnWindow(self.root, self)
+    
+    def open_statistics(self):
+        if self.statistics_window and self.statistics_window.winfo_exists():
+            self.statistics_window.lift()
+            return
+        from .statistics_window import StatisticsWindow
+        self.statistics_window = StatisticsWindow(self.root, self)
+    
+    def clear_basket(self):
+        self.basket = []
+        self.all_sum = 0.0
     
     def run(self):
         self.root.mainloop()
@@ -214,119 +252,6 @@ class MainWindow:
     def __del__(self):
         if hasattr(self, 'conn'):
             self.conn.close()
-
-
-class BasketWindow:
-    def __init__(self, main_window):
-        self.main = main_window
-        self.window = tk.Toplevel(main_window.root)
-        self.window.geometry("500x550")
-        self.window.title("Корзина")
-        self.window.configure(bg="#f0f0f0")
-        self.window.protocol("WM_DELETE_WINDOW", self.close)
-        
-        self._create_widgets()
-        self.refresh()
-    
-    def _create_widgets(self):
-        frame = tk.Frame(self.window, bg="#f0f0f0", padx=15, pady=15)
-        frame.pack(fill='both', expand=True)
-        
-        tk.Label(frame, text="Корзина", font="Arial 18 bold", bg="#f0f0f0", fg="#2c6e9e").pack()
-        
-        items_frame = tk.Frame(frame, bg="#f0f0f0")
-        items_frame.pack(fill='both', expand=True, pady=10)
-        
-        self.scrollable = tk.Frame(items_frame, bg="#f0f0f0")
-        self.scrollable.pack(fill='both', expand=True)
-        
-        bottom = tk.Frame(frame, bg="#f0f0f0")
-        bottom.pack(fill='x', pady=10)
-        
-        self.total_lbl = tk.Label(bottom, text="", font="Arial 16 bold", bg="#f0f0f0", fg="#2c6e9e")
-        self.total_lbl.pack(side='left', padx=10)
-        
-        btn_buy = tk.Button(bottom, text="Купить", font="Arial 14", bg="#2c6e9e", fg="white",
-                           relief="raised", padx=15, pady=5, command=self.buy)
-        btn_buy.pack(side='right', padx=10)
-    
-    def refresh(self):
-        for w in self.scrollable.winfo_children():
-            w.destroy()
-        
-        self.total_lbl.config(text=f"Итоговая сумма: {self.main.all_sum:.2f} руб.")
-        
-        for item in self.main.basket:
-            lbl = tk.Label(self.scrollable, text=f"{item.product_name} x {item.quantity} = {item.total_price:.2f} руб.",
-                          font="Arial 12", fg="#2c6e9e", bg="#f0f0f0")
-            lbl.pack(anchor='w', pady=2)
-    
-    def buy(self):
-        if not self.main.basket:
-            return
-        
-        items = [(item.product_id, item.quantity) for item in self.main.basket]
-        check_id = self.main.sale_repo.create_receipt(cashier_id=1, items=items)
-        
-        messagebox.showinfo("Успех", f"Покупка оформлена!\nЧек №{check_id}\nСумма: {self.main.all_sum:.2f} руб.")
-        
-        self.main.basket = []
-        self.main.all_sum = 0.0
-        self.refresh()
-        self.close()
-    
-    def close(self):
-        self.window.destroy()
-        self.main.basket_window = None
-    
-    def winfo_exists(self):
-        return self.window.winfo_exists()
-    
-    def lift(self):
-        self.window.lift()
-
-
-class CatalogWindow:
-    def __init__(self, main_window):
-        self.main = main_window
-        self.window = tk.Toplevel(main_window.root)
-        self.window.geometry("500x650")
-        self.window.title("Каталог лекарств")
-        self.window.configure(bg="#f0f0f0")
-        
-        self._create_widgets()
-        self._show_products()
-    
-    def _create_widgets(self):
-        frame = tk.Frame(self.window, bg="#f0f0f0", padx=15, pady=15)
-        frame.pack(fill='both', expand=True)
-        
-        tk.Label(frame, text="Каталог лекарств", font="Arial 18 bold", bg="#f0f0f0", fg="#2c6e9e").pack(pady=10)
-        
-        search_frame = tk.Frame(frame, bg="#f0f0f0")
-        search_frame.pack(fill='x', pady=5)
-        
-        self.search_entry = tk.Entry(search_frame, font="Arial 12", width=30, relief="solid", bd=1)
-        self.search_entry.pack(side='left', fill='x', expand=True, padx=5)
-        self.search_entry.bind("<KeyRelease>", self._filter)
-        
-        self.products_frame = tk.Frame(frame, bg="#f0f0f0")
-        self.products_frame.pack(fill='both', expand=True, pady=10)
-    
-    def _show_products(self, filter_text=""):
-        for w in self.products_frame.winfo_children():
-            w.destroy()
-        
-        filtered = self.main.products
-        if filter_text:
-            filtered = [p for p in filtered if filter_text.lower() in p.name.lower()]
-        
-        for p in filtered:
-            tk.Label(self.products_frame, text=f"{p.name} — {p.price:.2f} руб. (остаток: {p.quantity_at_storage})",
-                    font="Arial 12", bg="#f0f0f0", fg="#333333").pack(anchor='w', pady=2, padx=10)
-    
-    def _filter(self, event):
-        self._show_products(self.search_entry.get())
 
 
 if __name__ == "__main__":
