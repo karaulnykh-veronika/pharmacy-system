@@ -42,4 +42,53 @@ make docker-down
 Диаграммы
 
 ## Автор
-karaulnykh-veronika
+karaulnykh-veronika and Noise-of-Durka
+
+## Работа с компонентом
+
+```bash
+make build-lib        # сборка пакета
+make install-lib-local # локальная установка
+make publish-lib      # публикация на TestPyPI
+
+##  Работа с переиспользуемым компонентом
+
+```bash
+make build-lib        # сборка пакета из packages/core/
+make install-lib-local # локальная установка компонента
+make publish-lib      # публикация на TestPyPI (требуется регистрация)
+
+## Тестирование
+
+make test             # все тесты (unit)
+make smoke-test       # smoke-тесты
+make coverage         # отчёт о покрытии
+make check-all        # полная проверка
+## Docker
+make docker-build     # сборка образа
+make docker-up        # запуск контейнера
+make docker-down      # остановка контейнера
+
+## Очистка
+make clean            # удаление временных файлов
+
+##  Работа с переиспользуемым компонентом
+
+```bash
+make build-lib        # сборка пакета из packages/core/
+make install-lib-local # локальная установка компонента
+make publish-lib      # публикация на TestPyPI (требуется регистрация)
+
+## Тестирование
+
+make test             # все тесты (unit)
+make smoke-test       # smoke-тесты
+make coverage         # отчёт о покрытии
+make check-all        # полная проверка
+## Docker
+make docker-build     # сборка образа
+make docker-up        # запуск контейнера
+make docker-down      # остановка контейнера
+
+## Очистка
+make clean            # удаление временных файлов

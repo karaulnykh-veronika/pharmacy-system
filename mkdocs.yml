@@ -1,10 +1,25 @@
-site_name: Pharmacy System
-site_description: Аптечная система управления продажами, складом и возвратами
+site_name: Pharmacy Management System
+site_description: Документация проекта аптека
+site_author: karaulnykh-veronika
+
 theme:
   name: material
   language: ru
+  features:
+    - navigation.tabs
+    - navigation.sections
+
 nav:
   - Главная: index.md
   - Спецификация: specification.md
   - Архитектура: architecture.md
-  - API: api.md
+  - Диаграммы:
+      - Контекст: diagrams/context.mmd
+      - Use Case: diagrams/usecase.mmd
+      - Sequence: diagrams/sequence.mmd
+
+markdown_extensions:
+  - pymdownx.superfences
+
+extra_javascript:
+  - https://unpkg.com/mermaid/dist/mermaid.min.js

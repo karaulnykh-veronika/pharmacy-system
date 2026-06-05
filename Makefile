@@ -36,8 +36,14 @@ coverage:
 	@echo "📊 Отчёт: открыть coverage/index.html"
 
 docs:
-	@echo "📚 Документация в docs/specification.md и docs/architecture.md"
-	@echo "📊 Диаграммы в docs/diagrams/ (Mermaid)"
+	@echo " Документация проекта:"
+	@echo "  Спецификация: docs/specification.md"
+	@echo "  Архитектура: docs/architecture.md"
+	@echo "  Диаграммы: docs/diagrams/"
+	@echo ""
+	@echo "Для просмотра диаграмм Mermaid используйте:"
+	@echo "  - GitHub (они отображаются автоматически)"
+	@echo "  - https://mermaid.live/ (вставьте содержимое .mmd файлов)"
 
 docker-build:
 	docker build -t pharmacy-system:latest .
@@ -105,3 +111,19 @@ smoke-test:
 
 check-all: test smoke-test coverage
 	@echo " Полная проверка пройдена!"
+
+docs-serve:
+	@echo " Запуск сервера документации..."
+	mkdocs serve
+
+docs-build:
+	@echo " Сборка статического сайта..."
+	mkdocs build
+	@echo " Сайт собран в папке site/"
+	@echo "   Откройте site/index.html в браузере"
+
+docs-open:
+	@echo " Открытие документации в браузере..."
+	start site/index.html 2>/dev/null || open site/index.html 2>/dev/null || xdg-open site/index.html 2>/dev/null || echo "Откройте site/index.html вручную"
+
+docs: docs-build docs-open
